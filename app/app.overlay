@@ -1,6 +1,7 @@
 / {
     aliases {
         led0 = &led0;
+        app-led = &led0;
     };
     leds {
         compatible = "gpio-leds";
