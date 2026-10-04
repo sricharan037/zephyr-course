@@ -1,0 +1,10 @@
+description: LED Mock Sensor Driver Binding
+compatible: "my,led-sensor"
+
+include: [sensor-device.yaml, base.yaml]
+
+properties:
+  led-gpios:
+    type: phandle-array
+    required: true
+    description: GPIO connected to the LED.

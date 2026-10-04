@@ -1,0 +1,8 @@
+config LED_SENSOR
+    bool "LED Mock Sensor Driver"
+    default y
+    depends on DT_HAS_MY_LED_SENSOR_ENABLED
+    select SENSOR
+    select GPIO
+    help
+      Enable driver for the LED-based mock sensor.
