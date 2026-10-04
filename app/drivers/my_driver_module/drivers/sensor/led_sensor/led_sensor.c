@@ -17,6 +17,7 @@ struct led_sensor_config
 struct led_sensor_data
 {
     int32_t state;
+    int32_t custom_threshhold;
 };
 
 static int led_sensor_sample_fetch(const struct device *dev, enum sensor_channel chan)
@@ -27,7 +28,7 @@ static int led_sensor_sample_fetch(const struct device *dev, enum sensor_channel
     gpio_pin_set_dt(&cfg->led, 1);
     data->state = 1;
 
-    LOG_INF("sensor_sample_fetch: LED turned ON");
+    LOG_INF("sensor_sample_fetch: LED turned ON (custom value = %d)", data->custom_threshhold);
     return 0;
 }
 
@@ -37,7 +38,7 @@ static int led_sensor_channel_get(const struct device *dev, enum sensor_channel 
     struct led_sensor_data *data = dev->data;
 
     val->val1 = data->state;
-    val->val2 = 0;
+    val->val2 = data->custom_threshhold;
 
     gpio_pin_set_dt(&cfg->led, 0);
     data->state = 0;
@@ -46,9 +47,21 @@ static int led_sensor_channel_get(const struct device *dev, enum sensor_channel 
     return 0;
 }
 
-static const struct sensor_driver_api led_sensor_api = {
-    .sample_fetch = led_sensor_sample_fetch,
-    .channel_get = led_sensor_channel_get,
+static int led_sensor_impl_set_param(const struct device *dev, int32_t val)
+{
+    struct led_sensor_data *data = dev->data;
+    data->custom_threshhold = val;
+
+    LOG_INF("Custom parameter updated = %d", val);
+    return 0;
+}
+
+static const struct led_sensor_driver_api led_sensor_api = {
+    .sensor_api = {
+        .sample_fetch = led_sensor_sample_fetch,
+        .channel_get = led_sensor_channel_get,
+    },
+    .set_param = led_sensor_impl_set_param,
 };
 
 static int led_sensor_init(const struct device *dev)
@@ -73,7 +86,10 @@ static int led_sensor_init(const struct device *dev)
 }
 
 #define LED_SENSOR_INIT(inst)                                          \
-    static struct led_sensor_data led_sensor_data_##inst;              \
+    static struct led_sensor_data led_sensor_data_##inst = {           \
+        .state = 0,                                                    \
+        .custom_threshhold = 10, /* Default initial value */           \
+    };                                                                 \
     static const struct led_sensor_config led_sensor_config_##inst = { \
         .led = GPIO_DT_SPEC_INST_GET(inst, led_gpios),                 \
     };                                                                 \
