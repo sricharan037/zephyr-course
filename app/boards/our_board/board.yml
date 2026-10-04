@@ -1,0 +1,6 @@
+board:
+  name: our_board
+  full_name: OUR BOARD
+  vendor: espressif
+  socs:
+  - name: esp32
