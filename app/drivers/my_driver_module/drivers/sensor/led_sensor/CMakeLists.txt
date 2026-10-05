@@ -1,2 +1,4 @@
 zephyr_library()
-zephyr_library_sources(led_sensor.c)
+
+zephyr_library_sources_ifdef(CONFIG_LED_SENSOR led_sensor.c)
+zephyr_sources_ifdef(CONFIG_SHELL led_sensor_shell_commands.c)
